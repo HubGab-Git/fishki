@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Niemieckie Czasowniki Nieregularne</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #3498db;
+            font-size: large; 
+        }
+
+        #verbContainer {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .correct {
+            background-color: rgb(66, 232, 66);
+        }
+
+        /* Klasa dla błędnej odpowiedzi */
+        .incorrect {
+            background-color: #ff9999;
+        }
+
+        .podpowiedz {
+            text-align: left;
+            margin-top: 1px; /* Przesuń podpowiedź do góry */
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Niemieckie Czasowniki Nieregularne</h1>
+
+    <div id="verbContainer">
+        <p id="translation">Przetłumacz na niemiecki:</p>
+        <input type="text" id="inputInfinitiv" placeholder="Infinitiv" autocapitalize="none"/>
+        <p id="correctInfinitiv" class="podpowiedz"></p>
+        <input type="text" id="inputImperfekt" placeholder="Imperfekt" autocapitalize="none"/>
+        <p id="correctImperfekt" class="podpowiedz"></p>
+        <input type="text" id="inputPerfekt" placeholder="Perfekt" autocapitalize="none"/>
+        <p id="correctPerfekt" class="podpowiedz"></p>
+        <button id="checkBtn" onclick="checkVerb()">Sprawdź</button>
+        <button id="nextBtn" onclick="nextVerb()">Następny czasownik</button>
+    </div>
+
+    <button id="random10Btn" onclick="getRandom10()">Losuj 10</button>
+    <p>Liczba poprawnych tłumaczeń: <span id="correctCount">0/0</span></p>
+    <button id="prevPageBtn" onclick="prevPage()">Poprzednia strona</button>
+    <script>
+        // Dane dotyczące czasowników nieregularnych
+        let verbsData = [];
+        let currentIndex = null;
+        let currentVerbIndex = 0;
+        let correctTranslationsCount = 0;
+        let correctIndexes = []
+        let random10 = false
+        let random10List = []
+        const translationText = document.getElementById("translation");
+        const infinitiv = document.getElementById('inputInfinitiv');
+        const imperfekt = document.getElementById('inputImperfekt');
+        const perfekt = document.getElementById('inputPerfekt');
+        const resultMessage = document.getElementById("resultMessage");
+        const correctInfinitiv = document.getElementById('correctInfinitiv');
+        const correctImperfekt = document.getElementById('correctImperfekt');
+        const correctPerfekt = document.getElementById('correctPerfekt');
+
+        // Funkcja do sprawdzania odpowiedzi
+        function checkVerb() {
+            let tableLenght = null
+            if (random10){
+                tableLenght = random10List.length
+            }else{
+                tableLenght = verbsData.length
+            }
+            
+            if (currentIndex <= tableLenght) {
+                let row = null;
+                if (random10){
+                    row = verbsData[random10List[currentIndex]];
+                }else{
+                    row = verbsData[currentIndex];
+                }
+                
+                const userForm1 = infinitiv.value.trim();
+                const userForm2 = imperfekt.value.trim();
+                const userForm3 = perfekt.value.trim();
+                console.log('userForm1: '+userForm1+ ' inva: '+infinitiv.value.trim()+ ' row0: '+ row[0] );
+                if (userForm1 === row[0]) {
+                    console.log("corr")
+                    infinitiv.classList.add('correct'); // Dodajemy klasę "correct" dla poprawnej odpowiedzi
+                } else {
+                    console.log("fals")
+                    infinitiv.classList.add('incorrect'); // Dodajemy klasę "incorrect" dla błędnej odpowiedzi
+                    correctInfinitiv.textContent = row[0]
+                }
+                if (userForm2 === row[1]) {
+                    imperfekt.classList.add('correct'); // Dodajemy klasę "correct" dla poprawnej odpowiedzi
+                } else {
+                    imperfekt.classList.add('incorrect'); // Dodajemy klasę "incorrect" dla błędnej odpowiedzi
+                    correctImperfekt.textContent = row[1]
+                }
+                if (userForm3 === row[2]) {
+                    perfekt.classList.add('correct'); // Dodajemy klasę "correct" dla poprawnej odpowiedzi
+                } else {
+                    perfekt.classList.add('incorrect'); // Dodajemy klasę "incorrect" dla błędnej odpowiedzi
+                    correctPerfekt.textContent = row[2]
+                }
+                if (
+                    userForm1 === row[0] &&
+                    userForm2 === row[1] &&
+                    userForm3 === row[2]
+                ) {
+                    if (!correctIndexes.includes(currentIndex)) {
+                        correctIndexes.push(currentIndex)
+                        correctTranslationsCount++;
+                    }
+                    updateCorrectCountDisplay();
+                }
+            }
+        }
+
+        // Inicjalizuj pierwszy czasownik
+        fetchCsvFile();
+        function prevPage() {
+            // Nazwa pliku HTML, który ma zostać otwarty
+            var plikHTML = "index.html";
+
+            // Zmienia aktualny adres URL na adres pliku HTML w tym samym folderze
+            window.location.href = plikHTML;
+        }
+
+        function fetchCsvFile() {
+            let fileName ="czasownikiNieregularne.csv";
+
+            fetch(fileName)
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split('\n');
+                    verbsData = rows.map(row => row.split(','));
+                    if (currentIndex > verbsData.length || currentIndex == null){
+                        currentIndex = getRandomIndex(verbsData.length);
+                    }
+                    showRow(currentIndex); // Pokaż pierwszą fiszkę po wczytaniu danych
+                    updateCorrectCountDisplay()
+                })
+                .catch(error => console.error('Błąd wczytywania pliku CSV:', error));
+                
+        }
+
+        function getRandomIndex(max) {
+            let randomIndex = Math.floor(Math.random() * max);
+            if (correctIndexes.length != max){
+                while (correctIndexes.includes(randomIndex)){
+                    randomIndex = Math.floor(Math.random() * max);
+                }
+            }
+            
+            return randomIndex;
+        }
+
+        function updateCorrectCountDisplay() {
+            // Znajdź element, gdzie będzie wyświetlany wynik
+            const correctCountElement = document.getElementById('correctCount');
+
+            // Aktualizuj zawartość elementu z liczbą poprawnych tłumaczeń i liczby wszystkich fiszek
+            if (correctCountElement) {
+                if (random10){
+                    correctCountElement.textContent = `${correctTranslationsCount}/${random10List.length}`;
+                }else{
+                    correctCountElement.textContent = `${correctTranslationsCount}/${verbsData.length}`;
+                }
+                
+            }
+        }
+
+        function showRow(index) {
+            let row = null;
+            if (random10){
+                console.log("random list: "+ random10List)
+                console.log("index: "+index)
+                row = verbsData[random10List[index]];
+                console.log("random row: "+row)
+                
+            }else{
+                row = verbsData[index];
+                console.log("row: "+row)
+            }
+            
+            translationText.textContent = row[3];
+        }
+
+        function nextVerb() {
+            // const back = document.getElementById('back');
+            const translationInput = document.getElementById('translationInput');
+            if (infinitiv || imperfekt || perfekt) {
+                infinitiv.classList.remove('correct');
+                infinitiv.classList.remove('incorrect');
+                imperfekt.classList.remove('correct');
+                imperfekt.classList.remove('incorrect');
+                perfekt.classList.remove('correct');
+                perfekt.classList.remove('incorrect');
+                infinitiv.value = '';
+                imperfekt.value = '';
+                perfekt.value = '';
+                correctInfinitiv.textContent = '';
+                correctImperfekt.textContent = '';
+                correctPerfekt.textContent = '';
+            }
+            if (random10){
+                currentIndex = getRandomIndex(random10List.length);
+            }else{
+                currentIndex = getRandomIndex(verbsData.length);
+            }
+            
+            showRow(currentIndex);
+        }
+
+        function getRandom10(){
+            random10 = true;
+            random10List = [];
+            let randomnNumber = Math.floor(Math.random() * verbsData.length);
+            while ( random10List.length < 10 ){
+                if (!random10List.includes(randomnNumber)){
+                    random10List.push(randomnNumber)
+                }
+                randomnNumber = Math.floor(Math.random() * verbsData.length);
+            }
+            nextVerb(); // Pokaż pierwszą fiszkę po wczytaniu danych
+            updateCorrectCountDisplay()
+        }
+    </script>
+</body>
+</html>
