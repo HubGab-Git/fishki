@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symulator fiszek</title>
+    <style>
+        /* Keep your existing styles */
+        /* Klasa dla poprawnej odpowiedzi */
+        .correct {
+            background-color: rgb(66, 232, 66);
+        }
+
+        /* Klasa dla błędnej odpowiedzi */
+        .incorrect {
+            background-color: red;
+        }
+        /* Add some responsive styling */
+        body {
+            font-size: 24px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #flashcard {
+            max-width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #tlumaczenie input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            box-sizing: border-box;
+            height: auto; /* Domyślnie ustaw na "auto" */
+            min-height: 40px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 24px;
+        }
+        textarea {
+            font-size: 24px;
+            width: 100%;
+            height: auto; /* Domyślnie ustaw na "auto" */
+            min-height: 40px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        p#correctCount {
+            text-align: center;
+        }
+
+        /* Style for the dropdown */
+        #flashcardSelector {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+        select#flashcardSet {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        box-sizing: border-box;
+        appearance: none;
+        background: transparent;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    select#flashcardSet:focus {
+        outline: none;
+        border-color: #3498db; /* Zmień kolor obramowania po zaznaczeniu */
+    }
+    #flashcardSet {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    box-sizing: border-box;
+    font-size: 24px; /* Zwiększ rozmiar czcionki */
+}
+    </style>
+</head>
+<body>
+    <p>Liczba poprawnych tłumaczeń: <span id="correctCount">0/0</span></p>
+    <div id="flashcard">
+        <p id="front">Niemiecki</p>
+        <p id="back">Polski</p>
+        <div id="tlumaczenie">
+            <textarea type="text" id="translationInput" placeholder="Wpisz tłumaczenie" autocapitalize="none"></textarea>
+            <button id="checkBtn" onclick="checkOnClick()">Sprawdź</button>
+        </div>
+    </div>
+    <button id="nextBtn" onclick="nextFlashcard()">Następna fiszka</button>
+    <button id="switchBtn" onclick="switchFlashcardType()">Fiszki polsko-niemieckie</button>
+    <label for="flashcardSet">Wybierz zestaw fiszek:</label>
+    <input type="text" id="flashcardSet" name="flashcardInput" list="flashcardSetList" autocomplete="on">
+    <datalist id="flashcardSetList">
+        <option value="liczby">
+        <option value="czas">
+        <option value="kierunki">
+        <option value="kolory">
+        <option value="kraje">
+        <option value="tematy">
+        <option value="waga">
+        <option value="a1">
+        <option value="a2">
+        <option value="a3">
+        <option value="a4">
+        <option value="a5">
+        <option value="a6">
+        <option value="a7">
+        <option value="a8">
+        <option value="a9">
+        <option value="a10">
+        <option value="a11">
+        <option value="a12">
+        <option value="a13">
+        <option value="a14">
+        <option value="a15">
+        <option value="b1">
+        <option value="b2">
+        <option value="b3">
+        <option value="b4">
+        <option value="b5">
+        <option value="b6">
+        <option value="b7">
+        <option value="b8">
+        <option value="b9">
+        <option value="b10">
+        <option value="b11">
+        <option value="b12">
+        <option value="b13">
+        <option value="c1">
+        <option value="d1">
+        <option value="d2">
+        <option value="d3">
+        <option value="d4">
+        <option value="d5">
+        <option value="d6">
+        <option value="e1">
+        <option value="e2">
+        <option value="e3">
+        <option value="e4">
+        <option value="e5">
+        <option value="e6">
+        <option value="e7">
+        <option value="f1">
+        <option value="f2">
+        <option value="f3">
+        <option value="f4">
+        <option value="f5">
+        <option value="f6">
+        <option value="f7">
+        <option value="f8">
+        <option value="f9">
+        <option value="g1">
+        <option value="g2">
+        <option value="g3">
+        <option value="g4">
+        <option value="g5">
+        <option value="g6">
+        <option value="g7">
+        <option value="g8">
+        <option value="g9">
+        <option value="h1">
+        <option value="h2">
+        <option value="h3">
+        <option value="h4">
+        <option value="h5">
+        <option value="h6">
+        <option value="h7">
+        <option value="i1">
+        <option value="i2">
+        <option value="j1">
+        <option value="j2">
+        <option value="k1">
+        <option value="k2">
+        <option value="k3">
+        <option value="k4">
+        <option value="k5">
+        <option value="k6">
+        <option value="k7">
+        <option value="k8">
+        <option value="l1">
+        <option value="l2">
+        <option value="l3">
+        <option value="l4">
+        <option value="l5">
+        <option value="l6">
+        <option value="l7">
+        <option value="m1">
+        <option value="m2">
+        <option value="m3">
+        <option value="m4">
+        <option value="m5">
+        <option value="m6">
+        <option value="n1">
+        <option value="n2">
+        <option value="n3">
+        <option value="o1">
+        <option value="o2">
+        <option value="o3">
+        <option value="p1">
+        <option value="p2">
+        <option value="p3">
+        <option value="p4">
+        <option value="r1">
+        <option value="r2">
+        <option value="r3">
+        <option value="r4">
+        <option value="s1">
+        <option value="s2">
+        <option value="s3">
+        <option value="s4">
+        <option value="s5">
+        <option value="s6">
+        <option value="s7">
+        <option value="s8">
+        <option value="s9">
+        <option value="s10">
+        <option value="s11">
+        <option value="s12">
+        <option value="s13">
+        <option value="s14">
+        <option value="t1">
+        <option value="t2">
+        <option value="t3">
+        <option value="t4">
+        <option value="t5">
+        <option value="u1">
+        <option value="u2">
+        <option value="u3">
+        <option value="v1">
+        <option value="v2">
+        <option value="v3">
+        <option value="v4">
+        <option value="w1">
+        <option value="w2">
+        <option value="w3">
+        <option value="w4">
+        <option value="w5">
+        <option value="w6">
+        <option value="w7">
+        <option value="w8">
+        <option value="w1">
+        <option value="w2">
+        <option value="w3">
+        <option value="czasowniki1">
+        <option value="czasowniki2">
+        <option value="czasowniki3">
+        <option value="czasowniki4">
+        <option value="czasowniki5">
+        <option value="czasowniki6">
+        <option value="czasowniki7">
+        <option value="czasowniki8">
+        <option value="czasowniki9">
+        <option value="czasowniki10">
+        <option value="czasowniki11">
+        <option value="czasowniki12">
+        <option value="czasowniki13">
+        <option value="czasowniki14">
+        <option value="czasowniki15">
+        <option value="czasowniki16">
+        <option value="czasowniki17">
+        <option value="czasowniki18">
+    </datalist>
+    <button id="irregularVerbsBtn" onclick="openIrregularVerbs()">Czasowniki Nieregularne</button>
+    <script src="script.js"></script>
+</body>
+</html>
